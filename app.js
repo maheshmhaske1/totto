@@ -11,6 +11,7 @@ var usersRouter = require('./routes/users');
 var otpRouter = require('./routes/otp')
 const notification = require('./routes/notification.router')
 const children = require('./routes/children.router')
+const course = require('./routes/courses.router')
 
 var app = express();
 db.dbConnection()
@@ -35,6 +36,7 @@ app.use('/user', usersRouter);
 app.use('/otp', otpRouter);
 app.use('/notification', notification);
 app.use('/children', children);
+app.use('/courses', course);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

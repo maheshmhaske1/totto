@@ -5,12 +5,11 @@ const { upload_profile } = require('../middleware/upload')
 const { authenticate_user } = require('../middleware/auth')
 
 
-/* GET users listing. */
+// /* GET users listing. */
 router.get('/', (req, res, next) => {
   res.send('respond with a resource');
 });
 
-router.post('/create', userController.createUser)
 router.post('/create', userController.createUser)
 router.post('/login', userController.login)
 router.post('/is-found', userController.isUserExist)

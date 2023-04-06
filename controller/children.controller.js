@@ -1,57 +1,20 @@
 const { default: mongoose } = require('mongoose')
 const children = require('../model/children.model')
 const userModel = require('../model/user.model')
+const quations = require('../model/quationary.model')
 
 exports.addChildren = async (req, res) => {
     const {
-        parentId, name, nickName, DOB, relation, gender,
-        calm_himself_by_bringing_hand_to_mouth,
-        express_emotions_like_pleasure_and_discomfort,
-        try_to_look_for_his_parent,
-        recognize_family_faces,
-        smile_at_familiar_faces,
-        respond_positively_to_touch,
-        make_gurgling_sound,
-        cry_differently_on_different_need,
-        try_to_imitate_sound,
-        follow_people_with_his_eyes,
-        follow_object_with_his_eyes,
-        observe_faces_with_interest,
-        raise_his_head_lying_on_his_stomach,
-        bring_his_hand_to_his_mouth,
-        try_to_touch_dangling_objects,
-        has_started_to_smile_at_others
+        parentId, name, nickName, DOB, relation, gender
     } = req.body
 
     await new children({
-        parentId:parentId,
+        parentId: parentId,
         name: name,
         nickName: nickName,
         DOB: DOB,
         relation: relation,
-        gender: gender,
-        cognitive: [{
-            calm_himself_by_bringing_hand_to_mouth: calm_himself_by_bringing_hand_to_mouth,
-            express_emotions_like_pleasure_and_discomfort: express_emotions_like_pleasure_and_discomfort,
-            try_to_look_for_his_parent: try_to_look_for_his_parent,
-            recognize_family_faces: recognize_family_faces,
-            smile_at_familiar_faces: smile_at_familiar_faces,
-            respond_positively_to_touch: respond_positively_to_touch,
-            make_gurgling_sound: make_gurgling_sound,
-            cry_differently_on_different_need: cry_differently_on_different_need,
-            try_to_imitate_sound: try_to_imitate_sound,
-            follow_people_with_his_eyes: follow_people_with_his_eyes,
-            follow_object_with_his_eyes: follow_object_with_his_eyes,
-            observe_faces_with_interest: observe_faces_with_interest
-        }],
-        language: [{
-            raise_his_head_lying_on_his_stomach: raise_his_head_lying_on_his_stomach,
-            bring_his_hand_to_his_mouth: bring_his_hand_to_his_mouth,
-            try_to_touch_dangling_objects: try_to_touch_dangling_objects
-        }],
-        physical: [{
-            has_started_to_smile_at_others: has_started_to_smile_at_others
-        }]
+        gender: gender
     })
         .save()
         .then(success => {
@@ -121,7 +84,18 @@ exports.getByParentId = async (req, res) => {
         })
     }
 
-    await children.find({ parentId: mongoose.Types.ObjectId(parentId) })
+    // await children.find({ parentId: mongoose.Types.ObjectId(parentId) })
+    await children.aggregate([
+        { $match: { parentId: mongoose.Types.ObjectId(parentId) } },
+        {
+            $lookup: {
+                from: "quations",
+                foreignField: "childId",
+                localField: "_id",
+                as: "quations"
+            }
+        }
+    ])
         .then(success => {
             return res.json({
                 status: true,
@@ -202,7 +176,8 @@ exports.delete = async (req, res) => {
     }
 
     await children.findOneAndDelete({ _id: mongoose.Types.ObjectId(childId) })
-        .then(success => {
+        .then(async (success) => {
+            await quations.deleteMany({ childId: mongoose.Types.ObjectId(childId) })
             return res.json({
                 status: true,
                 message: "child data deleted",
