@@ -99,8 +99,24 @@ exports.getChat = async (req, res) => {
         }
 
         await chat.aggregate([
-            { $match: { userId: mongoose.Types.ObjectId(userId) } }
-        ])
+            { $match: { userId: mongoose.Types.ObjectId(userId) } },
+            {
+                $lookup: {
+                    from: "users",
+                    foreignField: "_id",
+                    localField: "userId",
+                    as: "userDetails"
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    userId: "$userId",
+                    first_name: { $arrayElemAt: ["$userDetails.first_name", 0] }
+                }
+            },
+            { $group: { _id: "$userId", first_name: { $first: "$first_name" } } }
+        ])        
             .then(success => {
                 return res.json({
                     status: true,
