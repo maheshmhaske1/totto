@@ -10,7 +10,7 @@ const dotenv = require('dotenv').config()
 
 
 exports.createUser = async (req, res) => {
-    let { name, email, mobile } = req.body
+    let { name, email, mobile, referCode } = req.body
 
     let error_message = `please enter`
     if (!name) {
@@ -30,6 +30,21 @@ exports.createUser = async (req, res) => {
         })
     }
 
+    const refferedUserAccount = await userModel.findOne({
+        referalCode: referCode
+    })
+
+    function generateRandomString() {
+        let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let result = '';
+        for (let i = 0; i < 10; i++) {
+            let randomNumber = Math.floor(Math.random() * characters.length);
+            result += characters.charAt(randomNumber);
+        }
+        return result;
+    }
+    let randomString = generateRandomString();
+
     const isUserFound = await userModel.findOne({ mobile: mobile })
     if (isUserFound) {
         return res.json({
@@ -43,9 +58,22 @@ exports.createUser = async (req, res) => {
         name: name,
         email: email,
         mobile: mobile,
+        referalCode: randomString,
+        coin:0
     }).save()
         .then(async (success) => {
             console.log("success ==>", success)
+
+            if (refferedUserAccount) {
+                await userModel.findOneAndUpdate({
+                    _id: mongoose.Types.ObjectId(refferedUserAccount._id)
+                },
+                    {
+                        $set: {
+                            coin: refferedUserAccount.coin + 100
+                        }
+                    })
+            }
 
             const token = await jwtMiddleware.generate_token_user(success._id, success.mobile)
             console.log(token)
@@ -367,6 +395,35 @@ exports.addUserWallet = async (req, res) => {
             })
         })
 }
+
+exports.getUserDetails = async (req, res) => {
+    const { userId } = req.params
+
+    if (!userId) {
+        return res.json({
+            status: false,
+            message: "please provide valid userId"
+        })
+    }
+
+    await userModel.findOne({
+        _id: mongoose.Types.ObjectId(userId)
+    })
+        .then((success) => {
+            return res.json({
+                success: true,
+                message: `money added in user wallet`,
+                data: success
+            })
+        })
+        .catch((error) => {
+            return res.json({
+                success: false,
+                message: "something went wrong", error
+            })
+        })
+}
+
 
 /* ---------- remove profile image ------------ */
 exports.remove_profile_img = async (req, res) => {

@@ -13,6 +13,7 @@ router.get('/', (req, res, next) => {
 router.post('/create', userController.createUser)
 router.post('/login', userController.login)
 router.post('/otp/send/:mobile', userController.sendOtp)
+router.post('/get/:userId', userController.getUserDetails)
 router.post('/otp/verify', userController.verifyOtp)
 router.post('/is-found', userController.isUserExist)
 router.post('/upload-profile/:user_id', upload_profile, userController.add_profile_image)

@@ -16,6 +16,12 @@ const userSchema = new mongoose.Schema({
     token: {
         type: String
     },
+    coin: {
+        type: Number
+    },
+    referalCode: {
+        type: String
+    }
 
 })
 
