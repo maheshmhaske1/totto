@@ -10,17 +10,17 @@ const dotenv = require('dotenv').config()
 
 
 exports.createUser = async (req, res) => {
-    let { first_name, last_name, email, mobile, password, photo } = req.body
+    let { name, email, mobile } = req.body
 
     let error_message = `please enter`
-    if (!first_name) {
-        error_message += `first name`
+    if (!name) {
+        error_message += `name`
     }
     if (!mobile) {
         error_message += `, mobile`
     }
-    if (!password) {
-        error_message += `, password`
+    if (!email) {
+        error_message += `, Email`
     }
 
     if (error_message !== "please enter") {
@@ -30,7 +30,7 @@ exports.createUser = async (req, res) => {
         })
     }
 
-    const isUserFound = await userModel.findOne({ email: email })
+    const isUserFound = await userModel.findOne({ mobile: mobile })
     if (isUserFound) {
         return res.json({
             success: false,
@@ -38,15 +38,11 @@ exports.createUser = async (req, res) => {
         })
     }
 
-    const hashed_password = await bcrypt.hash(password, 10);
 
     await new userModel({
-        first_name: first_name,
-        last_name: last_name,
+        name: name,
         email: email,
         mobile: mobile,
-        password: hashed_password,
-        photo: photo
     }).save()
         .then(async (success) => {
             console.log("success ==>", success)
@@ -78,6 +74,87 @@ exports.createUser = async (req, res) => {
                 message: "something went wrong", error
             })
         })
+}
+
+exports.sendOtp = async (req, res) => {
+    const mobile = req.params.mobile
+
+    if (!mobile) {
+        return res.json({
+            status: false,
+            message: "please enter mobile"
+        })
+    }
+
+    return res.json({
+        status: true,
+        message: `otp sent on ${mobile} your otp is 000000`
+    })
+}
+
+exports.verifyOtp = async (req, res) => {
+    const { mobile, otp } = req.body
+
+    if (!mobile || !otp) {
+        return res.json({
+            status: false,
+            message: "mobile and otp required"
+        })
+    }
+
+    if (otp !== '000000') {
+        return res.json({
+            status: false,
+            message: "please enter valid otp"
+        })
+    }
+
+    const isUserExist = await userModel.findOne({
+        mobile: mobile
+    })
+
+    if (!isUserExist) {
+        return res.json({
+            isNewUser: true,
+            message: "user not present",
+            data: []
+        })
+    }
+    else {
+        return res.json({
+            isNewUser: true,
+            message: "user already present",
+            data: isUserExist
+        })
+    }
+}
+
+exports.isUserExist = async (req, res) => {
+    const mobile = req.params.mobile
+
+    if (!mobile) {
+        return res.json({
+            status: false,
+            message: "please enter mobile"
+        })
+    }
+
+    const isUserExist = await userModel.findOne({
+        mobile: mobile
+    })
+
+    if (!isUserExist) {
+        return res.json({
+            status: false,
+            message: "user not present with this mobile"
+        })
+    }
+    else {
+        return res.json({
+            status: true,
+            message: "user exists"
+        })
+    }
 }
 
 exports.login = async (req, res) => {
@@ -217,37 +294,37 @@ exports.resetPassword = async (req, res) => {
 
 }
 
-exports.isUserExist = async (req, res) => {
-    let { username } = req.body
+// exports.isUserExist = async (req, res) => {
+//     let { username } = req.body
 
-    let error_message = `please enter`
+//     let error_message = `please enter`
 
-    if (!username) {
-        error_message += `, email`
-    }
+//     if (!username) {
+//         error_message += `, email`
+//     }
 
-    if (error_message !== "please enter") {
-        return res.json({
-            success: false,
-            message: error_message
-        })
-    }
+//     if (error_message !== "please enter") {
+//         return res.json({
+//             success: false,
+//             message: error_message
+//         })
+//     }
 
-    const isUserFound = await userModel.findOne({ email: username })
-    if (!isUserFound) {
-        return res.json({
-            success: false,
-            message: "email not registered"
-        })
-    }
-    else {
-        return res.json({
-            success: true,
-            message: "user found"
-        })
-    }
+//     const isUserFound = await userModel.findOne({ email: username })
+//     if (!isUserFound) {
+//         return res.json({
+//             success: false,
+//             message: "email not registered"
+//         })
+//     }
+//     else {
+//         return res.json({
+//             success: true,
+//             message: "user found"
+//         })
+//     }
 
-}
+// }
 
 exports.addUserWallet = async (req, res) => {
     const { userId, price } = req.body
