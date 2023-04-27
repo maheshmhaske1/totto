@@ -13,6 +13,8 @@ const notification = require('./routes/notification.router')
 const children = require('./routes/children.router')
 const course = require('./routes/courses.router')
 const chatHistory = require('./routes/chat.router')
+const task = require('./routes/tasks.route')
+const category = require('./routes/category.router')
 
 var app = express();
 db.dbConnection()
@@ -39,6 +41,8 @@ app.use('/notification', notification);
 app.use('/children', children);
 app.use('/courses', course);
 app.use('/chat', chatHistory)
+app.use('/task', task)
+app.use('/category', category)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

@@ -37,7 +37,6 @@ exports.add = async (req, res) => {
 
 }
 
-
 exports.deleteMessage = async (req, res) => {
     const { messageId } = req.params
 
@@ -116,7 +115,7 @@ exports.getChat = async (req, res) => {
                 }
             },
             { $group: { _id: "$userId", first_name: { $first: "$first_name" } } }
-        ])        
+        ])
             .then(success => {
                 return res.json({
                     status: true,
@@ -158,7 +157,7 @@ exports.getChat = async (req, res) => {
                 }
             },
             { $group: { _id: "$userId", first_name: { $first: "$first_name" } } }
-        ])        
+        ])
             .then(success => {
                 return res.json({
                     status: true,

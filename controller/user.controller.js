@@ -1,4 +1,5 @@
 const userModel = require('../model/user.model')
+const inquiry = require('../model/inquiry.model')
 const mailMiddleware = require('../middleware/mail.middleware')
 const jwtMiddleware = require('../middleware/auth')
 const fs = require('fs-extra')
@@ -59,7 +60,7 @@ exports.createUser = async (req, res) => {
         email: email,
         mobile: mobile,
         referalCode: randomString,
-        coin:0
+        coin: 0
     }).save()
         .then(async (success) => {
             console.log("success ==>", success)
@@ -513,6 +514,145 @@ exports.add_profile_image = async (req, res) => {
             return res.json({
                 status: false,
                 message: `error`, error
+            })
+        })
+}
+
+
+exports.addInquiry = async (req, res) => {
+    const { userId, Qnt } = req.body
+
+    if (!userId || !Qnt) {
+        return res.json({
+            status: false,
+            message: "userId,Qnt,Ans are required fields"
+        })
+    }
+
+    await new inquiry({
+        userId: userId,
+        Qnt: Qnt,
+        isAnswered: false
+    })
+        .save()
+        .then(success => {
+            return res.json({
+                status: true,
+                message: "inquiry added",
+                data: success
+            })
+        })
+        .catch(error => {
+            return res.json({
+                status: false,
+                message: "something went wrong",
+
+            })
+        })
+
+}
+
+exports.getInquiryById = async (req, res) => {
+    const { inquiryId } = req.params
+
+    if (!inquiryId) {
+        return res.json({
+            status: false,
+            message: "please enter inquiry id"
+        })
+    }
+
+    await inquiry.findOne({ _id: mongoose.Types.ObjectId(inquiryId) })
+        .then(success => {
+            return res.json({
+                status: true,
+                message: "inquiry details",
+                data: success
+            })
+        })
+        .catch(error => {
+            return res.json({
+                status: false,
+                message: "something went wrong",
+
+            })
+        })
+}
+
+exports.getInquiryByUserId = async (req, res) => {
+    const { userId } = req.params
+
+    if (!userId) {
+        return res.json({
+            status: false,
+            message: "please enter userId"
+        })
+    }
+
+    await inquiry.findOne({ userId: mongoose.Types.ObjectId(userId) })
+        .then(success => {
+            return res.json({
+                status: true,
+                message: "inquiry details",
+                data: success
+            })
+        })
+        .catch(error => {
+            return res.json({
+                status: false,
+                message: "something went wrong",
+
+            })
+        })
+}
+
+exports.updateInquiry = async (req, res) => {
+    const { inquiryId } = req.params
+    const updateDetails = req.body
+
+    if (!inquiryId) {
+        return res.json({
+            status: false,
+            message: "please enter inquiry id"
+        })
+    }
+
+    await inquiry.findOneAndUpdate({ _id: mongoose.Types.ObjectId(inquiryId) },
+        {
+            $set: updateDetails
+        },
+        { returnOriginal: false })
+        .then(success => {
+            return res.json({
+                status: true,
+                message: "inquiry details updated",
+                data: success
+            })
+        })
+        .catch(error => {
+            return res.json({
+                status: false,
+                message: "something went wrong",
+
+            })
+        })
+}
+
+exports.getAllInquiry = async (req, res) => {
+
+    await inquiry.find({})
+        .then(success => {
+            return res.json({
+                status: true,
+                message: "inquiry details",
+                data: success
+            })
+        })
+        .catch(error => {
+            return res.json({
+                status: false,
+                message: "something went wrong",
+
             })
         })
 }

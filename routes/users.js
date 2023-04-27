@@ -19,4 +19,10 @@ router.post('/is-found', userController.isUserExist)
 router.post('/upload-profile/:user_id', upload_profile, userController.add_profile_image)
 router.post('/reset-password', userController.resetPassword)
 
+router.post('/inquiry/add', userController.addInquiry)
+router.get('/inquiry/getAll', userController.getAllInquiry)
+router.get('/inquiry/get/:inquiryId', userController.getInquiryById)
+router.get('/inquiry/getByUser/:userId', userController.getInquiryByUserId)
+router.put('/inquiry/update/:inquiryId', userController.updateInquiry)
+
 module.exports = router;
