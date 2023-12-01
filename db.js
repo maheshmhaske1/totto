@@ -7,7 +7,7 @@ exports.dbConnection = async () => {
             console.log('Connected with MongoDB...')
         }
         else {
-            console.log('error while connecting...', error)
+            console.log('.error while connecting...', error)
         }
     })
 }
